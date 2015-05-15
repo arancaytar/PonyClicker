@@ -771,7 +771,7 @@ $(function(){
       lastSave = timestamp;
     }
     if((timestamp - lastTick)>500) {
-      Game.totalTime += 500;
+      Game.totalTime += timestamp - lastTick;
       $stat_time.html(displayTime(Game.totalTime));
       UpdateOverlay(null, null);
       lastTick = timestamp;
