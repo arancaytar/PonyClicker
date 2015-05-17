@@ -288,8 +288,8 @@ $(function(){
     if (t[0] > 100) return "Centuries"; // more than 100 years
     for (var i = 2; i <= 4; i++) if (t[i] < 10) t[i] = "0" + t[i];
     var output = t[2] + ":" + t[3] + ":" + t[4];
-    if (t[1]) output = t[1] + " days, " + output;
-    if (t[0]) output = t[0] + " years, " + output;
+    if (t[1]) output = Pluralize(t[1], " day") + ", " + output;
+    if (t[0]) output = Pluralize(t[0], " year") + ", " + output;
     return output;
   }
   function Pluralize(n, s, fixed) { return PrettyNum(n, fixed) + s + ((n==1)?'':'s'); }
