@@ -275,6 +275,23 @@ $(function(){
     if(n >= number_names.length) return "Infinity";
     return (fixed?(x/1000).toFixed(3):(x/1000)) + " " + number_names[n];
   }
+  function PrintTime(time) {
+    var t = [0, 0, 0, 0, 0]; // years, days, hours, minutes, seconds
+    t[4] = time % 60;
+    time = (time - t[4]) / 60;
+    t[3] = time % 60;
+    time = (time - t[3]) / 60;
+    t[2] = time % 24;
+    time = (time - t[2]) / 24;
+    t[1] = time % 365;
+    t[0] = (time - t[1]) / 365;
+    if (t[0] > 100) return "Centuries"; // more than 100 years
+    for (var i = 2; i <= 4; i++) if (t[i] < 10) t[i] = "0" + t[i];
+    var output = t[2] + ":" + t[3] + ":" + t[4];
+    if (t[1]) output = t[1] + " days, " + output;
+    if (t[0]) output = t[0] + " years, " + output;
+    return output;
+  }
   function Pluralize(n, s, fixed) { return PrettyNum(n, fixed) + s + ((n==1)?'':'s'); }
 
   function basic_upgrade(sps, item, p, m) { sps[item] = (sps[item]+p)*(m+1); return sps; }
@@ -508,6 +525,9 @@ $(function(){
             smilethumb,
             $(document.createElement('span'))
               .attr('id','cost'+i)
+              .html(0)," ",
+            $(document.createElement('span'))
+              .attr('id','countdown'+i)
               .html(0)
           ),
         $countSpan = $(document.createElement('span'))
@@ -682,6 +702,7 @@ $(function(){
         $buyN.attr('class',(cost>Game.smiles)?"disable":"");
       }
       $("#cost" + i).html(PrettyNum(cost));
+      $("#countdown" + i).html((cost>Game.smiles && Game.SPS > 0) ? "(" + PrintTime(Math.ceil((cost - Game.smiles) / Game.SPS)) + ")" : "");
       $("#count" + i).html(count);
     }
     
