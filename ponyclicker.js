@@ -10,6 +10,7 @@ $(function(){
       $loadscreen = $('#loadscreen'),
       $EnableE = $('#EnableEffects'),
       $EnableF = $('#EnableFocus'),
+      $EnableT = $('#EnableCountdown'),
       $EnableW = $('#EnableWarn'),
       $upgrades_total = $('#upgrades_total'),
       $ponyversion = {major:0,minor:86,revision:0};
@@ -127,11 +128,13 @@ $(function(){
   function ApplySettings() {
     $EnableE.prop('checked',Game.settings.useCanvas);
     $EnableF.prop('checked',Game.settings.optimizeFocus);
+    $EnableT.prop('checked',Game.settings.showCountdown);
     $EnableW.prop('checked',Game.settings.closingWarn);
   }
   function GetSettings() {
     Game.settings.useCanvas = $EnableE.prop('checked');
     Game.settings.optimizeFocus = $EnableF.prop('checked');
+    Game.settings.showCountdown = $EnableT.prop('checked');
     Game.settings.closingWarn = $EnableW.prop('checked');
   }
 
@@ -527,6 +530,7 @@ $(function(){
               .attr('id','cost'+i)
               .html(0)," ",
             $(document.createElement('span'))
+              .addClass('countdown')
               .attr('id','countdown'+i)
               .html(0)
           ),
@@ -541,6 +545,9 @@ $(function(){
 
     $store.append($item);
   }
+  $EnableT.change(function() {
+    $('.countdown').toggle(this.checked);
+  }).change();
 
   function Click(id) {
       var amount = Math.floor(Game.SPC);
