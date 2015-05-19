@@ -10,6 +10,7 @@ $(function(){
       $loadscreen = $('#loadscreen'),
       $EnableE = $('#EnableEffects'),
       $EnableF = $('#EnableFocus'),
+      $EnableT = $('#EnableCountdown'),
       $EnableW = $('#EnableWarn'),
       $upgrades_total = $('#upgrades_total'),
       $ponyversion = {major:0,minor:87,revision:0};
@@ -127,11 +128,13 @@ $(function(){
   function ApplySettings() {
     $EnableE.prop('checked',Game.settings.useCanvas);
     $EnableF.prop('checked',Game.settings.optimizeFocus);
+    $EnableT.prop('checked',Game.settings.showCountdown);
     $EnableW.prop('checked',Game.settings.closingWarn);
   }
   function GetSettings() {
     Game.settings.useCanvas = $EnableE.prop('checked');
     Game.settings.optimizeFocus = $EnableF.prop('checked');
+    Game.settings.showCountdown = $EnableT.prop('checked');
     Game.settings.closingWarn = $EnableW.prop('checked');
   }
 
@@ -274,6 +277,23 @@ $(function(){
     var n = Math.floor((d-3)/3) - 1;
     if(n >= number_names.length) return "Infinity";
     return (fixed?(x/1000).toFixed(3):(x/1000)) + " " + number_names[n];
+  }
+  function PrintTime(time) {
+    var t = [0, 0, 0, 0, 0]; // years, days, hours, minutes, seconds
+    t[4] = time % 60;
+    time = (time - t[4]) / 60;
+    t[3] = time % 60;
+    time = (time - t[3]) / 60;
+    t[2] = time % 24;
+    time = (time - t[2]) / 24;
+    t[1] = time % 365;
+    t[0] = (time - t[1]) / 365;
+    if (t[0] > 100) return "Centuries"; // more than 100 years
+    for (var i = 2; i <= 4; i++) if (t[i] < 10) t[i] = "0" + t[i];
+    var output = t[2] + ":" + t[3] + ":" + t[4];
+    if (t[1]) output = Pluralize(t[1], " day") + ", " + output;
+    if (t[0]) output = Pluralize(t[0], " year") + ", " + output;
+    return output;
   }
   function Pluralize(n, s, fixed) { return PrettyNum(n, fixed) + s + ((n==1)?'':'s'); }
 
@@ -508,6 +528,10 @@ $(function(){
             smilethumb,
             $(document.createElement('span'))
               .attr('id','cost'+i)
+              .html(0)," ",
+            $(document.createElement('span'))
+              .addClass('countdown')
+              .attr('id','countdown'+i)
               .html(0)
           ),
         $countSpan = $(document.createElement('span'))
@@ -521,6 +545,9 @@ $(function(){
 
     $store.append($item);
   }
+  $EnableT.change(function() {
+    $('.countdown').toggle(this.checked);
+  }).change();
 
   function Click(id) {
       var amount = Math.floor(Game.SPC);
@@ -682,6 +709,7 @@ $(function(){
         $buyN.attr('class',(cost>Game.smiles)?"disable":"");
       }
       $("#cost" + i).html(PrettyNum(cost));
+      $("#countdown" + i).html((cost>Game.smiles && Game.SPS > 0) ? "(" + PrintTime(Math.ceil((cost - Game.smiles) / Game.SPS)) + ")" : "");
       $("#count" + i).html(count);
     }
     
