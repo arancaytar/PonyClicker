@@ -37,6 +37,7 @@ $(function(){
         useCanvas:true,
         optimizeFocus:false,
         closingWarn:false,
+        numDisplay:0, // 0 is names, 1 is raw numbers, 2 is scientific notation
       }
     };
   }
@@ -95,6 +96,7 @@ $(function(){
     {
       case 3:
         Game = g;
+        if(Game.settings.numDisplay === undefined) Game.settings.numDisplay = 0;
         break;
       default:
         alert('Unrecognized version! Game not loaded.');
@@ -130,12 +132,17 @@ $(function(){
     $EnableF.prop('checked',Game.settings.optimizeFocus);
     $EnableT.prop('checked',Game.settings.showCountdown);
     $EnableW.prop('checked',Game.settings.closingWarn);
+    $('#numdisplay' + Game.settings.numDisplay).prop('checked', true);
   }
   function GetSettings() {
     Game.settings.useCanvas = $EnableE.prop('checked');
     Game.settings.optimizeFocus = $EnableF.prop('checked');
     Game.settings.showCountdown = $EnableT.prop('checked');
     Game.settings.closingWarn = $EnableW.prop('checked');
+    if($('#numdisplay0').prop('checked')) Game.settings.numDisplay = 0;
+    if($('#numdisplay1').prop('checked')) Game.settings.numDisplay = 1;
+    if($('#numdisplay2').prop('checked')) Game.settings.numDisplay = 2;
+    UpdateSPS();
   }
 
   LoadGame();
@@ -270,13 +277,45 @@ $(function(){
       .last().prependTo($news).css('opacity',0).html(GetNews()).fadeTo(500,1)
       .next().fadeTo(500,0);
   }
+  function NumCommas(x) {
+    if(x<1e20) { // if we're below the precision threshold of toFixed, we cheat and insert commas into that.
+      var n = x.toFixed(0);
+      var len = n.length%3;
+      if(!len) len = 3;
+      var r = n.substring(0, len);
+      for(var i = len; i < n.length; i+=3) {
+        r += ',' + n.substring(i, i+3);
+      }
+      return r;
+    }
+    // TODO: This is laughably inefficient because we build the arrays in reverse.
+    var r = (Math.floor(x)%1000).toFixed(0);
+    x = Math.floor(x/1000);
+    while(x) {
+      var len = r.split(',')[0].length;
+      for(var i = len; i < 3; ++i) {
+        r = '0' + r;
+      }
+      r = (x%1000).toFixed(0) + ',' + r;
+      x = Math.floor(x/1000);
+    }
+    return r;
+  }
   function PrettyNum(x, fixed) {
-    var d = Math.floor(Math.log10(x));
-    if(d<6) return x.toFixed(0);
-    x = Math.floor(x/Math.pow(10,d-(d%3)-3));
-    var n = Math.floor((d-3)/3) - 1;
-    if(n >= number_names.length) return "Infinity";
-    return (fixed?(x/1000).toFixed(3):(x/1000)) + " " + number_names[n];
+    switch(Game.settings.numDisplay)
+    {
+    case 0:
+      var d = Math.floor(Math.log10(x));
+      if(d<6) return NumCommas(x);
+      x = Math.floor(x/Math.pow(10,d-(d%3)-3));
+      var n = Math.floor((d-3)/3) - 1;
+      if(n >= number_names.length) return "Infinity";
+      return (fixed?(x/1000).toFixed(3):(x/1000)) + " " + number_names[n];
+    case 1:
+      return NumCommas(Math.floor(x));
+    case 2:
+      return (x<=999999)?NumCommas(x):(x.toExponential(3).replace("e+","&times;10<sup>")+'</sup>');
+    }
   }
   function PrintTime(time) {
     var t = [0, 0, 0, 0, 0]; // years, days, hours, minutes, seconds
@@ -305,12 +344,12 @@ $(function(){
   function gen_totalsps(sps, store) { var total = 0; for(var i = 0; i < sps.length; ++i) { total += sps[i]*store[i]; } return total; }
 
   var upgradeList = [ {cost:0, name:"UNDEFINED", desc:"ERROR", fn:null},
-    {cost:700, name:"Clicking Assistants", desc: "Clicking gets +1 SPC for every pony you have.", fn:function(sps,store){return gen_upgradetype2(sps, store[0], 1, 0);} },
-    {cost:7000, name:"Friendship is Clicking", desc: "Clicking gets +1 SPC for every friendship you have.", fn:function(sps,store){return gen_upgradetype2(sps, store[1], 1, 0);} },
-    {cost:70000, name:"Ticklish Cursors", desc: "Clicking gets 1% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.01, 0); }},
-    {cost:700000, name:"Feathered Cursors", desc: "Clicking gets 2% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.02, 0); }},
-    {cost:8000000, name:"Advanced Tickle-fu", desc: "Clicking gets 3% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.03, 0); }},
-    {cost:90000000, name:"Happiness Injection", desc: "Clicking gets 4% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.04, 0); }},
+    {cost:700, name:"Booping Assistants", desc: "Booping gets +1 SPC for every pony you have.", fn:function(sps,store){return gen_upgradetype2(sps, store[0], 1, 0);} },
+    {cost:7000, name:"Friendship is Booping", desc: "Booping gets +1 SPC for every friendship you have.", fn:function(sps,store){return gen_upgradetype2(sps, store[1], 1, 0);} },
+    {cost:70000, name:"Ticklish Cursors", desc: "Booping gets 1% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.01, 0); }},
+    {cost:700000, name:"Feathered Cursors", desc: "Booping gets 2% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.02, 0); }},
+    {cost:8000000, name:"Advanced Tickle-fu", desc: "Booping gets 3% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.03, 0); }},
+    {cost:90000000, name:"Happiness Injection", desc: "Booping gets 4% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.04, 0); }},
     {cost:10000, name:"Friendship Is Magic", desc: "Friendships generate +1 SPS for every other friendship.", fn:gen_upgradetype1(1, 1, 0) },
     {cost:1000000, name:"Friendship Is Spellcraft", desc: "Friendships generate +10 SPS for every other friendship.", fn:gen_upgradetype1(1, 10, 0) },
     {cost:100000000, name:"Friendship Is Sorcery", desc: "Friendships generate +100 SPS for every other friendship.", fn:gen_upgradetype1(1, 100, 0) },
@@ -338,14 +377,16 @@ $(function(){
 
   var achievementList = {
     '1': { name:"Participation Award", desc: "You moved the mouse!", muffins:0},
-    '2': { name:"Hi there!", desc: "Click a pony <b>once</b>.", muffins:0, cond:function(){ return Game.clicks > 0; } },
+    '2': { name:"Hi there!", desc: "Boop a pony <b>once</b>.", muffins:0, cond:function(){ return Game.clicks > 0; } },
     '200': { name:"Cautious", desc: "Manually save the game.", muffins:1},
     '201': { name:"Paranoid", desc: "Export a save.", muffins:1},
     '202': { name:"Time Machine", desc: "Import a save.", muffins:1},
     '203': { name:"Narcissism!", desc: "Click the image of Cloud Hop on the credits page.", muffins:1},
     '204': { name:"Music Makes Everything Better", desc: "Listen to the smile song.", muffins:1},
     '205': { name:"You Monster", desc: "Sell a friendship.", muffins:1},
-    '206': { name:"No Booping Allowed", desc: "Get <b>"+PrettyNum(1000000000000)+"</b> smiles with only 35 pony clicks.", muffins:1, cond:function() { return Game.clicks <= 35 && Game.totalsmiles >= 1000000000000; } },
+    '206': { name:"No Booping Allowed", desc: "Get <b>"+PrettyNum(1000000000000)+"</b> smiles with only 35 pony boops.", muffins:1, cond:function() { return Game.clicks <= 35 && Game.totalsmiles >= 1000000000000; } },
+    '207': { name:"Wheel of Friendship", desc: "Spin the ponies.", muffins:1, cond:function() { return vangle>0.05; } },
+    '208': { name:"Centrifuge of Friendship", desc: "Spin the ponies <b>really fast</b>.", muffins:2, cond:function() { return vangle>3; } },
     '255': { name:"Completionist", desc: "Get all the achievements.", muffins:100}
   };
 
@@ -364,9 +405,9 @@ $(function(){
   var extraAchievements = Object.keys(achievementList).length-3; // minus three because the array starts at 1 instead of 0
   var achievementCount = 3;
   var achievements_clicks = genAchievements(
-    ["That tickles!", "Tickle War", "Tickle War II: The Retickling", "This Can't Be Healthy", "Carpal Tunnel Syndrome", "Wrist In Pieces", "Clickception"],
-    [10,100,1000,10000,50000,100000,200000],
-    function(n) { return "Click a pony <b>"+PrettyNum(n)+"</b> times."; },
+    ["That tickles!", "Tickle War", "Tickle War II: The Retickling", "It's Over Nine Thousand!", "This Can't Be Healthy", "Carpal Tunnel Syndrome", "Wrist In Pieces"],
+    [10,100,1000,9001,25000,50000,100000],
+    function(n) { return "Boop a pony <b>"+PrettyNum(n)+"</b> times."; },
     function(n) { return function() { return Game.clicks >= n; }; });
   achievements_clicks.push(2);
 
@@ -806,7 +847,7 @@ $(function(){
   }
 
    // Ticks are used for things like updating the total playtime
-  var lastTime, startTime, lastTick, lastSave;
+  var lastTime, startTime, lastTick, lastSave, lastSpin;
   function UpdateGame(timestamp) {
     if(!startTime) {
       startTime =
@@ -816,6 +857,14 @@ $(function(){
       lastSave = timestamp;
     }
     Game.delta = timestamp - lastTime;
+    
+    if(Math.abs(vangle)>0.0005) curangle += vangle*0.9;
+    vangle *= 0.95;
+    if(curangle != lastSpin) {
+      document.getElementById('ponyspin').style.transform = ('rotate('+curangle+'rad)');
+      lastSpin = curangle;
+    }
+    
     var hasFocus = !Game.settings.optimizeFocus || document.hasFocus(),
         framelength = (hasFocus?33:500); // 33 is 30 FPS
     if(Game.delta>framelength) { // play at 30 FPS or the text starts flickering
@@ -856,68 +905,76 @@ $(function(){
     window.requestAnimationFrame(UpdateGame);
   }
 
-  function UpdateOverlay(item, y) {
-    if(y != null && item >= 0)
-      $overlay.css('top',function(){ return Math.min(Math.max(y-40,0),window.innerHeight-this.offsetHeight) });
+  function UpdateOverlay(item, y, mobile) {
     if(item == null)
       item = $overlay.attr('data-item');
-    else if(item == $overlay.attr('data-item')) return;
-    $overlay.attr('data-item', item);
-
-    if(item < 0) return $overlay.hide();
-
-    var x = Store[item],
-        xcount = Game.store[item],
-        xcost = x.cost(xcount),
-        $title = $(document.createElement('div'))
-          .addClass('title')
-          .append('<p>'+x.name+'</p><span>'+smilethumb+PrettyNum(xcost)+'</span>');
-
-    if(xcount > 0) $title.append('<div>['+PrettyNum(xcount)+' owned]</div>');
-    $overlay.empty().append($title, '<hr><p>'+x.desc+'</p>');//<ul>
-    var $ul = $(document.createElement('ul'));
-
-    if(x.formula) $ul.append('<li class="formula">'+x.formula+'</li>');
-    if(x.SPS_cache > 0 || item==1) $ul.append('<li>Each '+x.name.toLowerCase()+' generates <b>'+Pluralize(x.SPS_cache, ' smile')+'</b> per second</li>');
-    if(xcount > 0 && x.SPS_cache > 0) $ul.append('<li><b>'+PrettyNum(xcount)+'</b> '+x.plural.toLowerCase()+' generating <b>'+Pluralize(xcount*x.SPS_cache, ' smile')+'</b> per second</li>');
-
-    var nstore = Game.store.slice();
-    nstore[item]+=1;
-    var nSPS = CalcSPS(nstore, false),
-        sps_increase = nSPS - Game.SPS,
-        payPerSmile = xcost/(nSPS - Game.SPS),
-        increaseText = sps_increase > 0 ? 'will increase your SPS by <b>'+PrettyNum(sps_increase)+'</b>' : "<b>won't</b> increase your SPS",
-        payPerSmileText = isFinite(payPerSmile) ? '<i>You pay <b>'+Pluralize(payPerSmile, ' smile') + '</b> per +1 SPS</i>' : '';
-
-    $ul.append('<li>Buying one '+x.name.toLowerCase()+' '+increaseText+payPerSmileText+'</li>');
-
-    // Display buy/sell information
-    var helpStr = '<li><kbd>Shift + Click</kbd> to buy 10';
-    if (xcount > 0 && item>0) helpStr += ', <kbd>Right click</kbd> to sell 1'; // you can't sell ponies
-    $ul.append(helpStr+'</li>');
+    else if(item != $overlay.attr('data-item'))
+    {
+      $overlay.attr('data-item', item);
+  
+      if(item < 0) return $overlay.hide();
+  
+      var x = Store[item],
+          xcount = Game.store[item],
+          xcost = x.cost(xcount),
+          $title = $(document.createElement('div'))
+            .addClass('title')
+            .append('<p>'+x.name+'</p><span>'+smilethumb+PrettyNum(xcost)+'</span>');
+  
+      if(xcount > 0) $title.append('<div>['+PrettyNum(xcount)+' owned]</div>');
+      $overlay.empty().append($title, '<hr><p>'+x.desc+'</p>');//<ul>
+      var $ul = $(document.createElement('ul'));
+  
+      if(x.formula) $ul.append('<li class="formula">'+x.formula+'</li>');
+      if(x.SPS_cache > 0 || item==1) $ul.append('<li>Each '+x.name.toLowerCase()+' generates <b>'+Pluralize(x.SPS_cache, ' smile')+'</b> per second</li>');
+      if(xcount > 0 && x.SPS_cache > 0) $ul.append('<li><b>'+PrettyNum(xcount)+'</b> '+x.plural.toLowerCase()+' generating <b>'+Pluralize(xcount*x.SPS_cache, ' smile')+'</b> per second</li>');
+  
+      var nstore = Game.store.slice();
+      nstore[item]+=1;
+      var nSPS = CalcSPS(nstore, false),
+          sps_increase = nSPS - Game.SPS,
+          payPerSmile = xcost/(nSPS - Game.SPS),
+          increaseText = sps_increase > 0 ? 'will increase your SPS by <b>'+PrettyNum(sps_increase)+'</b>' : "<b>won't</b> increase your SPS",
+          payPerSmileText = isFinite(payPerSmile) ? '<i>You pay <b>'+Pluralize(payPerSmile, ' smile') + '</b> per +1 SPS</i>' : '';
+  
+      $ul.append('<li>Buying one '+x.name.toLowerCase()+' '+increaseText+payPerSmileText+'</li>');
+  
+      // Display buy/sell information
+      var helpStr = '<li><kbd>Shift + Click</kbd> to buy 10';
+      if (xcount > 0 && item>0) helpStr += ', <kbd>Right click</kbd> to sell 1'; // you can't sell ponies
+      $ul.append(helpStr+'</li>');
+      
+      $overlay.append('<hr>',$ul).show();
+    }
     
-    $overlay.append('<hr>',$ul).show();
+    if(y != null && item >= 0)
+      $overlay.css('top',function(){ return Math.min(Math.max(y-(mobile?(16+this.offsetHeight):40),0),window.innerHeight-this.offsetHeight); });
   }
   function UpdateUpgradeOverlay(item, x, y) {
     if(item != null && item >= curUpgradeList.length) item = -1;
 
     if(y != null && item >= 0) {
-      $upgradeoverlay.css({
-        left: x-312 + 'px',
-        top: Math.max(y-14,0),
-      });
       if(y > ($storeupgrades.get(0).offsetHeight + $storeupgrades.offset().top)) item = -1;
     }
     if(item == null)
       item = $upgradeoverlay.attr('data-item');
-    else if(item == $upgradeoverlay.attr('data-item')) return;
-    if(item >= curUpgradeList.length) item = -1; // This edge case happens when you buy all the upgrades
-    $upgradeoverlay.attr('data-item', item);
+    else if(item != $upgradeoverlay.attr('data-item'))
+    {
+      if(item >= curUpgradeList.length) item = -1; // This edge case happens when you buy all the upgrades
+      $upgradeoverlay.attr('data-item', item);
+      
+      if(item < 0) return $upgradeoverlay.hide();
+      
+      var u = upgradeList[curUpgradeList[item]];
+      $upgradeoverlay.empty().html('<div class="title"><p>'+u.name+'</p><span>'+smilethumb+PrettyNum(u.cost)+'</span></div><hr><p>'+u.desc+'</p>').show();
+    }
     
-    if(item < 0) return $upgradeoverlay.hide();
-    
-    var x = upgradeList[curUpgradeList[item]];
-    $upgradeoverlay.empty().html('<div class="title"><p>'+x.name+'</p><span>'+smilethumb+PrettyNum(x.cost)+'</span></div><hr><p>'+x.desc+'</p>').show();
+    if(y != null && item >= 0) {
+      $upgradeoverlay.css({
+        left: Math.max(0, x-320) + 'px',
+        top: function(){ return Math.min(Math.max(y-(14+this.offsetHeight),0),window.innerHeight-this.offsetHeight); }
+      });
+    }
   }
   function ProcessSPS(delta) {
     Earn(Game.SPS*(delta/1000.0));
@@ -942,7 +999,7 @@ $(function(){
     UpdateStore();
     UpdateSPS();
     UpdateOverlay(null, null);
-    OrganizePonies();
+    if(id<2) OrganizePonies();
     CheckAchievements(achievements_shop);
   }
   function Sell(id) {
@@ -967,7 +1024,7 @@ $(function(){
     UpdateStore();
     UpdateSPS();
     UpdateOverlay(null, null);
-    OrganizePonies();
+    if(id<2) OrganizePonies();
     $stat_buildings.html(CountBuildings(Game.store).toFixed(0));
   }
   function BuyUpgrade(id) {
@@ -1001,7 +1058,8 @@ $(function(){
   }
   function OrganizePonies() {
     var n = Game.store[0],
-        r=(n>1?260:0),
+        radd = n*30,
+        r=(n>1?140+radd:0),
         a = (2*Math.PI)/ n,
         th = (n-2)*0.08,
         edge = GetEdgeLength(r, n);
@@ -1017,15 +1075,38 @@ $(function(){
                 left: Math.cos(a*i + th)*r-(edge/2),
                 width: edge,
                 height: edge,
-                backgroundSize: edge+'px',
-                backgroundImage: 'url("ponies/'+PonyList[pone]+'.svg")',
               });
 
       (function($el,index){ $el.on('click', function(){ Click(index) }) })($ponyDiv,i);
 
+      var $innerpony = $(document.createElement('div')).css({
+        transform: 'rotate('+(a*i + th + Math.PI/2)+'rad)',
+        backgroundSize: edge+'px',
+        backgroundImage: 'url("ponies/'+PonyList[pone]+'.svg")',
+      });
+      $ponyDiv.append($innerpony);
+      
       $ponywrapper.append($ponyDiv);
     }
 
+    canvaslines.width = r*2;
+    canvaslines.height = r*2;
+    canvaslines.style.left= -r + 'px';
+    radd+=20;
+    switch(n)
+    {
+      case 1:
+      case 2:
+        break;
+      case 3:
+        radd = radd+edge*0.4;
+        break;
+      default:
+        radd = radd+edge*0.5;
+    }
+    document.getElementById('ponywrapper').style.top = radd + 'px';
+    canvaslines.style.top= -r + radd + 'px';
+    
     // Draw friendship lines
     ctxlines.clearRect(0, 0, $canvaslines.width(), $canvaslines.height());
     ctxlines.beginPath();
@@ -1086,7 +1167,7 @@ $(function(){
   function ShowMenu(b) {
     $menubtn.toggle();
     $menu.toggle();
-    $board.css('padding-left',b?'259px':0);
+    if($doc.width() >= 600) $board.css('padding-left',b?'259px':0);
     ResizeCanvas();
   }
   
@@ -1110,17 +1191,18 @@ $(function(){
     var root = $('#buy0')[0],
         wrapper = $('#storewrapper')[0],
         item = -1,
-        actualTop = root.offsetTop-wrapper.scrollTop;
+        actualTop = root.offsetTop-wrapper.scrollTop+wrapper.offsetTop,
+        mobile = $doc.width() < 600;
         
-    if((event.clientX>wrapper.offsetLeft) && (event.clientY>actualTop)) {
+    if((event.clientX>wrapper.offsetLeft) && (event.clientY>actualTop) && (!mobile || event.clientY>wrapper.offsetTop)) {
       item = Math.floor((event.clientY - actualTop)/root.offsetHeight);
       if(item >= Store.length) item = -1;
     }
-    UpdateOverlay(item, event.clientY);
+    UpdateOverlay(item, event.clientY, mobile);
 
     item = -1;
-    actualTop = $('#storeupgrades')[0].offsetTop-wrapper.scrollTop;
-    if((event.clientX>wrapper.offsetLeft) && (event.clientY>actualTop)) {
+    actualTop = $('#storeupgrades')[0].offsetTop-wrapper.scrollTop+wrapper.offsetTop;
+    if((event.clientX>wrapper.offsetLeft) && (event.clientY>actualTop) && (!mobile || event.clientY>wrapper.offsetTop)) {
       item = Math.floor((event.clientY - actualTop)/52)*6 + Math.floor((event.clientX - wrapper.offsetLeft)/52);
     }
     UpdateUpgradeOverlay(item, event.clientX, event.clientY);
@@ -1171,14 +1253,51 @@ $(function(){
     EarnAchievement(204);
   });
   
+  var curangle = 0;
+  var lastangle = 0;
+  var vangle = 0;
+  var vlastangle = 0;
+  var mleftdown = false;
   $('#pagealert').on('click',function(){
     SaveGame(); Game.settings.closingWarn=false; location.reload(true);
   });
+  
+  function getAngle(event) {
+    var cx = $ponywrapper.offset().left;
+    var cy = $ponywrapper.offset().top;
+    return Math.atan2(event.clientY-cy, event.clientX-cx);
+  }
+  var fnmousedown = function(event) {
+    mleftdown = true; 
+    lastangle = getAngle(event)-curangle;
+    vlastangle = vangle = 0;
+  }
+  var fnmousemove = function(event) {
+    vlastangle = getAngle(event)-(curangle+lastangle);
+    curangle = (getAngle(event)-lastangle);
+  }
+  var fnmouseup = function(event) {
+    vangle = vlastangle;
+    mleftdown=false;
+    vlastangle = 0;
+  }
+  $('#ponyboard').on('mousedown', function(event){
+    if(event.which===1) fnmousedown(event);
+  }); 
+  $('#ponyboard').on('touchstart', function(event){ fnmousedown(event.originalEvent.targetTouches[0]); });
+  $('#ponyboard').on('mousemove', function(event){
+    if(mleftdown) fnmousemove(event);
+  });
+  $('#ponyboard').on('touchmove', function(event){ event.preventDefault(); fnmousemove(event.originalEvent.targetTouches[0]);});
   
   // doOnLoad equivalent
   $w.on('load',function(){
     $doc
       .on('mousemove',setMouseMove)
+      .on('mouseup',function(event){ if(event.which===1) fnmouseup(event); })
+      .on('touchend touchcancel',function(event){ fnmouseup(event); })
+      .on('mousedown',function(event){ if(event.which===1) { vlastangle=vangle; }})
+      .on('touchstart',function(event){ vlastangle=vangle; })
       .on('keydown', setShiftDown)
       .on('keyup', setShiftUp);
     window.onbeforeunload = function (e) {
