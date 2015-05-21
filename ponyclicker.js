@@ -32,7 +32,7 @@ $(function(){
       achievement_muffins:0, // Muffins from achievements only, recalculated every time an achievement is earned
       store:[1,0,0,0,0,0,0,0,0,0,0,0,0], // amount player has bought of each store item.
       ponyList:genPonyList(), // precalculated list of randomized ponies (so we can reconstruct them after a save/load)
-      version:3, // incremented every time this object format changes so we know to deal with it.
+      version:4, // incremented every time this object format changes so we know to deal with it.
       settings: {
         useCanvas:true,
         optimizeFocus:false,
@@ -95,8 +95,10 @@ $(function(){
     switch(g.version)
     {
       case 3:
+        g.settings.numDisplay = 0;
+        g.version = 4;
+      case 4:
         Game = g;
-        if(Game.settings.numDisplay === undefined) Game.settings.numDisplay = 0;
         break;
       default:
         alert('Unrecognized version! Game not loaded.');
@@ -255,11 +257,24 @@ $(function(){
           "Try new smile-powered Muffins today!",
           'Mayor held hostage by crazed Doctor, who demands that a muffin factory be built "for the sake of all ponykind!"',
           'Derpy and Troubleshoes get married! Ponyville does not survive the wedding.',
-          'Scientists investigate whether excessive muffin consumption can lead to long, overbearing plots.'
+          'Scientists investigate whether excessive muffin consumption can lead to long, overbearing plots.',
+          'Rarity to design new fashion line for plus sized mares, claiming “Muffin tops are in fashion this season”.',
+          "Rainbow Dash to host new midnight release party for AK Yearling’s latest novel, ‘Daring Do and the Muffin Man of Azkaban’.",
+          "Fluttershy cancels bi-weekly critter picnic in exchange for new Muffin Social. Critters could not be reached for comment.",
+          "Applejack introduces apple-spice muffins, in attempt to reignite declining produce sales.",
+          "Twilight Sparkle under house arrest for magical mammal manipulation, for trying to cross a mouse with a muffin.",
+          "Pinkie Pie launches new re-branding of cupcakes as ‘dessert muffins’, meets with mixed results."
         );
       }
       if(Game.muffins > 100) {
-        news.push('Derpy crashes into giant muffin. Irony is not amused.');
+        news.push('Derpy crashes into giant muffin. Irony is not amused.',
+        "Discord caught eating 40 muffins in one sitting, that’s as many as four 10’s, and that’s terrible.",
+          "Princess Celestia has eaten at least 37 muffins this year, when reached for comment, Princess Luna responded with ‘In a row?’.",
+          "Princess Cadence Announces that all muffins produced in the Crystal Empire now come with ‘Free Shipping’.  Her Highness then winked suggestively.",
+          "As muffin craze sweeps Equestria, Sapphire Shores to star in new musical, ‘My Little Muffin, Baked-goods are Magic’.",
+          "Diamond Tiara insists that her father has a bigger muffin collection than you, no matter how improbable that sounds.",
+          "New Poll from the Foal Free Press reveals that no food makes a young filly smile as much as a muffin."
+          );
       }
     }
 
@@ -330,41 +345,48 @@ $(function(){
     if (t[0] > 100) return "Centuries"; // more than 100 years
     for (var i = 3; i <= 4; i++) if (t[i] < 10) t[i] = "0" + t[i];
     var output = (t[2]>0?(t[2] + ":"):"") + t[3] + ":" + t[4];
-    if (t[1]) output = Pluralize(t[1], " day") + ", " + output;
-    if (t[0]) output = Pluralize(t[0], " year") + ", " + output;
+    if (t[1]) output = t[1] + " days and " + output;
+    if (t[0]) output = t[0] + " years, " + output;
     return output;
   }
-  function Pluralize(n, s, fixed) { return PrettyNum(n, fixed) + s + ((n==1)?'':'s'); }
+  function Pluralize2(n, s, s2, fixed) { return PrettyNum(n, fixed) + ((n==1)?s:s2); }
+  function Pluralize(n, s, fixed) { return Pluralize2(n, s, s + 's', fixed); }
 
-  function basic_upgrade(sps, item, p, m) { sps[item] = (sps[item]+p)*(m+1); return sps; }
-  function global_upgrade(sps, p, m) { for(var i = 0; i < sps.length; ++i) { sps[i] = (sps[i]+p)*(m+1); } return sps; }
-  function gen_upgradetype1(item, pSPS, mSPS) { return function(sps, store) { var c = store[item]; return basic_upgrade(sps, item, pSPS*c, mSPS*c); } }
-  function gen_upgradetype2(sps, count, pSPS, mSPS) { Game.SPC+=(pSPS*count); Game.SPC*=(1+mSPS); return sps; }
-  function gen_muffinupgrade(pSPS, mSPS) { return function(sps, store) { return global_upgrade(sps, pSPS, mSPS*Game.muffins); } }
-  function gen_totalsps(sps, store) { var total = 0; for(var i = 0; i < sps.length; ++i) { total += sps[i]*store[i]; } return total; }
+  function gen_upgradetype1(item, pSPS, mSPS) { return function(sps, store) { sps.pStore[item] += pSPS*store[item]; sps.mStore[item] += mSPS*store[item]; return sps; } }
+  function gen_upgradetype2(item, p, m) { return function(sps, store) { sps.pSPC += p*store[item]; sps.mSPC += m; return sps; } }
+  function gen_muffinupgrade(pSPS, mSPS) { return function(sps, store) { sps.mMuffin += mSPS*Game.muffins; return sps; } }
 
+  /* upgrade pool object: {
+    pSPS, // Global additive bonus to SPS (applied after store)
+    mSPS, // Global multiplier to SPS (applied after store)
+    pSPC, // Additive bonus to SPC
+    mSPC, // percentage of the total SPS after everything else has been applied to add to the SPC
+    mMuffin, // multiplier bonus applied after global SPS bonus (usually muffins)
+    pStore, // Array of additive bonuses to individual store item SPS
+    mStore // array of multiplicative bonuses to individual store item SPS
+  }*/
   var upgradeList = [ {cost:0, name:"UNDEFINED", desc:"ERROR", fn:null},
-    {cost:700, name:"Booping Assistants", desc: "Booping gets +1 SPC for every pony you have.", fn:function(sps,store){return gen_upgradetype2(sps, store[0], 1, 0);} },
-    {cost:7000, name:"Friendship is Booping", desc: "Booping gets +1 SPC for every friendship you have.", fn:function(sps,store){return gen_upgradetype2(sps, store[1], 1, 0);} },
-    {cost:70000, name:"Ticklish Cursors", desc: "Booping gets 1% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.01, 0); }},
-    {cost:700000, name:"Feathered Cursors", desc: "Booping gets 2% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.02, 0); }},
-    {cost:8000000, name:"Advanced Tickle-fu", desc: "Booping gets 3% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.03, 0); }},
-    {cost:90000000, name:"Happiness Injection", desc: "Booping gets 4% of your SPS.", fn:function(sps,store){return gen_upgradetype2(sps, gen_totalsps(sps, store), 0.04, 0); }},
+    {cost:600, name:"Booping Assistants", desc: "Booping gets +1 SPC for every pony you have.", fn:gen_upgradetype2(0, 1, 0)},
+    {cost:7000, name:"Friendship is Booping", desc: "Booping gets +1 SPC for every friendship you have.", fn:gen_upgradetype2(1, 1, 0) },
+    {cost:70000, name:"Ticklish Cursors", desc: "Booping gets 1% of your SPS.", fn:gen_upgradetype2(0, 0, 0.01)},
+    {cost:700000, name:"Feathered Cursors", desc: "Booping gets an additional 2% of your SPS.", fn:gen_upgradetype2(0, 0, 0.02)},
+    {cost:8000000, name:"Advanced Tickle-fu", desc: "Booping gets an additional 3% of your SPS.", fn:gen_upgradetype2(0, 0, 0.03)},
+    {cost:90000000, name:"Happiness Injection", desc: "Booping gets an additional 4% of your SPS.", fn:gen_upgradetype2(0, 0, 0.04)},
     {cost:10000, name:"Friendship Is Magic", desc: "Friendships generate +1 SPS for every other friendship.", fn:gen_upgradetype1(1, 1, 0) },
     {cost:1000000, name:"Friendship Is Spellcraft", desc: "Friendships generate +10 SPS for every other friendship.", fn:gen_upgradetype1(1, 10, 0) },
     {cost:100000000, name:"Friendship Is Sorcery", desc: "Friendships generate +100 SPS for every other friendship.", fn:gen_upgradetype1(1, 100, 0) },
     {cost:10000000000, name:"Friendship Is Witchcraft", desc: "Friendships generate +1000 SPS for every other friendship.", fn:gen_upgradetype1(1, 1000, 0) },
     {cost:1000000000000, name:"Friendship Is Benefits", desc: "Friendships generate +10000 SPS for every other friendship.", fn:gen_upgradetype1(1, 10000, 0) },
     {cost:7777777, name:"I just don't know what went wrong!", desc: "You gain +0.1% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.001) },
-    {cost:777777777, name:"That one mailmare", desc: "You gain +0.2% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.002) },
-    {cost:77777777777, name:"Derpy Delivery Service", desc: "You gain +0.3% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.003) },
-    {cost:7777777777777, name:"Blueberry Muffins", desc: "You gain +0.4% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.004) },
-    {cost:777777777777777, name:"Chocolate-chip Muffins", desc: "You gain +0.5% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.005) },
-    {cost:77777777777777777, name:"Lemon Muffins", desc: "You gain +0.6% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.006) },
-    {cost:7777777777777777777, name:"Poppy seed Muffins", desc: "You gain +0.7% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.007) },
-    {cost:777777777777777777777, name:"Muffin Bakeries", desc: "You gain +0.8% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.008) },
-    {cost:77777777777777777777777, name:"Designer Muffins", desc: "You gain +0.9% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.009) },
-    {cost:7777777777777777777777777, name:"Muffin Factories", desc: "You gain +1% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.01) },
+    {cost:777777777, name:"That one mailmare", desc: "You gain an additional +0.2% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.002) },
+    {cost:77777777777, name:"Derpy Delivery Service", desc: "You gain an additional +0.3% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.003) },
+    {cost:7777777777777, name:"Blueberry Muffins", desc: "You gain an additional +0.4% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.004) },
+    {cost:777777777777777, name:"Chocolate-chip Muffins", desc: "You gain an additional +0.5% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.005) },
+    {cost:77777777777777777, name:"Lemon Muffins", desc: "You gain an additional +0.6% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.006) },
+    {cost:7777777777777777777, name:"Poppy seed Muffins", desc: "You gain an additional +0.7% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.007) },
+    {cost:777777777777777777777, name:"Muffin Bakeries", desc: "You gain an additional +0.8% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.008) },
+    {cost:77777777777777777777777, name:"Designer Muffins", desc: "You gain an additional +0.9% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.009) },
+    {cost:7777777777777777777777777, name:"Muffin Factories", desc: "You gain an additional +1% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.01) },
     //{cost:50000, name:"Upgrade 3", desc: "Parties generate +1 SPS for every other party.", fn:gen_upgradetype1(2, 1, 0) }
   ];
 
@@ -427,7 +449,7 @@ $(function(){
     return genAchievements(
     names,
     [1, 50, 100, 150, 200],
-    function(n) { return "Buy <b>"+Pluralize(n, "</b> " + Store[item].name.toLowerCase()) + "."; },
+    function(n) { return "Buy <b>"+Pluralize2(n, "</b> " + Store[item].name.toLowerCase(), "</b> " + Store[item].plural.toLowerCase()) + "."; },
     genShopCond(item));
   }
 
@@ -506,7 +528,7 @@ $(function(){
             :'<strong>'+dynFontSize(upgradeList[prop].name)+'</strong><i>[upgrade]</i><hr><p>'+upgradeList[prop].desc+'</p>'
           )
           .appendTo($ach);
-
+        if(!upgrade) $(document.createElement('div')).addClass('muffin').html('+' + achievementList[prop].muffins).appendTo($ach);
         if (Game.achievements[prop]==null && !upgrade) $ach.addClass('hidden');
 
         return $ach;
@@ -762,14 +784,19 @@ $(function(){
         var hide = upgradeList[i].cost>Game.smiles;
         curUpgradeList.push(i);
         scopeUpgradeList.push(hide?-i:i);
-        var $ach = $(document.createElement('div'))
-          .addClass('achievement'+(hide?' hidden':''))
-          .css('background-image','url(upgrades.png)');
-
-        (function($el,index){ $el.on('click',function(){ BuyUpgrade(index) }); })($ach,i);
-
-        achs.push($ach);
       }
+    }
+    
+    curUpgradeList.sort(function(a, b){return upgradeList[a].cost-upgradeList[b].cost});
+    
+    for(var i = 0; i < curUpgradeList.length; ++i) {
+      var $ach = $(document.createElement('div'))
+        .addClass('achievement'+(hide?' hidden':''))
+        .css('background-image','url(upgrades.png)');
+
+      (function($el,index){ $el.on('click',function(){ BuyUpgrade(index) }); })($ach,curUpgradeList[i]);
+
+      achs.push($ach);
     }
     if(!arraysEqual(lastUpgrade,scopeUpgradeList)) {
       $storeupgrades.empty().append(achs);
@@ -786,22 +813,36 @@ $(function(){
   // Seperating this out lets us make predictions on what a purchase will do to your SPS
   function CalcSPS(store, docache) {
     var res = CalcSPSinit(store);
-    var SPC = Game.SPC;
-
-    Game.SPC = 1;
-    for(var i = Game.upgrades.length-1; i >= 0; i-=1) {
-      res = upgradeList[Game.upgrades[i]].fn(res, store);
-      if(!res || !res.length) {
+    
+    var obj = {
+      pSPS:0, // Global additive bonus to SPS (applied after store)
+      mSPS:0, // Global multiplier to SPS (applied after store)
+      pSPC:0, // Additive bonus to SPC
+      mSPC:0, // percentage of the total SPS after everything else has been applied to add to the SPC
+      mMuffin:0, // multiplier bonus applied after global SPS bonus (usually muffins)
+      pStore:new Array(res.length), // Array of additive bonuses to individual store item SPS
+      mStore:new Array(res.length) // array of multiplicative bonuses to individual store item SPS
+    };
+    for(var i = 0; i < res.length; ++i) { obj.pStore[i]=0; obj.mStore[i]=0; } // initialize values
+    
+    for(var i = 0; i < Game.upgrades.length; ++i) {
+      obj = upgradeList[Game.upgrades[i]].fn(obj, store);
+      if(!obj || obj.pSPS === undefined) {
         alert("ILLEGAL UPGRADE: " + Game.upgrades[i]);
       }
     }
-    if(!docache) { Game.SPC = SPC; } // HACK to fix SPC exploit
 
     var SPS = 0;
-    for(var i = 0; i < res.length; ++i) {
+    for(var i = 0; i < res.length; ++i) { // Calculate individual store object SPS and create base SPS amount
+      res[i] = (res[i]+obj.pStore[i])*(obj.mStore[i]+1.0);
       if(docache) { Store[i].SPS_cache = res[i]; }
       SPS += res[i]*store[i];
     }
+    SPS = (SPS+obj.pSPS)*(obj.mSPS+1.0); // Apply global SPS modifiers
+    SPS *= (obj.mMuffin+1.0); // Apply muffin modifiers
+    if(docache) // Calculate resulting SPC if we're caching values.
+      Game.SPC = 1 + obj.pSPC + (obj.mSPC*SPS);
+    
     return SPS;
   }
   function CalcSPSinit(store) {
@@ -870,6 +911,8 @@ $(function(){
     if(Game.delta>framelength) { // play at 30 FPS or the text starts flickering
       ProcessSPS(Game.delta);
       lastTime = timestamp;
+      //var $overlaytime = $('#overlaytime'); // Can't cache this because it's destroyed often
+      //if($overlaytime.length) $overlaytime.html(CalcTimeItem($overlaytime.attr('data-item')));
     }
     if((timestamp - lastNews)>newswait) {
       UpdateNews();
@@ -905,10 +948,19 @@ $(function(){
     window.requestAnimationFrame(UpdateGame);
   }
 
+  function CalcTimeItem(item) {
+    var time = Math.ceil((Store[item].cost(Game.store[item]) - Game.smiles) / Game.SPS);
+    return (time <= 0)?'<b>now</b>':('in <b>' + PrintTime(time)+'</b>');
+  }
+  
   function UpdateOverlay(item, y, mobile) {
+    var skip = false;
     if(item == null)
       item = $overlay.attr('data-item');
-    else if(item != $overlay.attr('data-item'))
+    else if(item == $overlay.attr('data-item'))
+      skip = true;
+      
+    if(!skip)
     {
       $overlay.attr('data-item', item);
   
@@ -928,17 +980,18 @@ $(function(){
       if(x.formula) $ul.append('<li class="formula">'+x.formula+'</li>');
       if(x.SPS_cache > 0 || item==1) $ul.append('<li>Each '+x.name.toLowerCase()+' generates <b>'+Pluralize(x.SPS_cache, ' smile')+'</b> per second</li>');
       if(xcount > 0 && x.SPS_cache > 0) $ul.append('<li><b>'+PrettyNum(xcount)+'</b> '+x.plural.toLowerCase()+' generating <b>'+Pluralize(xcount*x.SPS_cache, ' smile')+'</b> per second</li>');
-  
+      var lowerbound = Game.SPS/140737488355328; // this is Game.SPS / 2^47, which gives us about 5 bits of meaningful precision before the double falls apart.
       var nstore = Game.store.slice();
       nstore[item]+=1;
       var nSPS = CalcSPS(nstore, false),
           sps_increase = nSPS - Game.SPS,
           payPerSmile = xcost/(nSPS - Game.SPS),
-          increaseText = sps_increase > 0 ? 'will increase your SPS by <b>'+PrettyNum(sps_increase)+'</b>' : "<b>won't</b> increase your SPS",
-          payPerSmileText = isFinite(payPerSmile) ? '<i>You pay <b>'+Pluralize(payPerSmile, ' smile') + '</b> per +1 SPS</i>' : '';
+          increaseText = sps_increase > 0 ? 'will increase your SPS by <b>'+(sps_increase > lowerbound ? PrettyNum(sps_increase) : 'almost nothing')+'</b>' : "<b>won't</b> increase your SPS",
+          payPerSmileText = isFinite(payPerSmile) ? '<i>You pay <b>'+(sps_increase > lowerbound ? Pluralize(payPerSmile, ' smile') : 'way too many smiles') + '</b> per +1 SPS</i>' : '';
   
       $ul.append('<li>Buying one '+x.name.toLowerCase()+' '+increaseText+payPerSmileText+'</li>');
-  
+      if(xcost>Game.smiles && Game.SPS > 0) $ul.append('<li>This can be purchased <span id="overlaytime" data-item="'+item+'">' + CalcTimeItem(item) + '</span></li>');
+      
       // Display buy/sell information
       var helpStr = '<li><kbd>Shift + Click</kbd> to buy 10';
       if (xcount > 0 && item>0) helpStr += ', <kbd>Right click</kbd> to sell 1'; // you can't sell ponies
@@ -951,6 +1004,7 @@ $(function(){
       $overlay.css('top',function(){ return Math.min(Math.max(y-(mobile?(16+this.offsetHeight):40),0),window.innerHeight-this.offsetHeight); });
   }
   function UpdateUpgradeOverlay(item, x, y) {
+    var skip = false;
     if(item != null && item >= curUpgradeList.length) item = -1;
 
     if(y != null && item >= 0) {
@@ -958,7 +1012,10 @@ $(function(){
     }
     if(item == null)
       item = $upgradeoverlay.attr('data-item');
-    else if(item != $upgradeoverlay.attr('data-item'))
+    else if(item == $upgradeoverlay.attr('data-item'))
+      skip = true;
+      
+    if(!skip)
     {
       if(item >= curUpgradeList.length) item = -1; // This edge case happens when you buy all the upgrades
       $upgradeoverlay.attr('data-item', item);
@@ -1131,13 +1188,13 @@ $(function(){
   }
 
   var setShiftDown = function(event){
-      if(event.keyCode === 16 || event.charCode === 16){
+      if(event.keyCode === 16 || event.charCode === 16 || event.keyCode === 17 || event.charCode === 17){
           Game.shiftDown = true;
       }
   };
 
   var setShiftUp = function(event){
-      if(event.keyCode === 16 || event.charCode === 16){
+      if(event.keyCode === 16 || event.charCode === 16 || event.keyCode === 17 || event.charCode === 17){
           Game.shiftDown = false;
       }
   };
