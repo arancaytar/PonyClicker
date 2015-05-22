@@ -13,7 +13,7 @@ $(function(){
       $EnableT = $('#EnableCountdown'),
       $EnableW = $('#EnableWarn'),
       $upgrades_total = $('#upgrades_total'),
-      $ponyversion = {major:0,minor:88,revision:0};
+      $ponyversion = {major:0,minor:89,revision:0};
       
   function CreateGame() {
     return {
@@ -227,7 +227,7 @@ $(function(){
         "Princess Twilight found overdosed on friendship, taken to rehab center!",
         "Citizens of Ponyville so happy they invent new word for it! Debates about how to spell it immediately turn into murderous riots!");
     } else if(Game.totalsmiles < 1000000000000000) {
-      news.push("Ponyville citizens suffer from chronic happiness! Doctors unsure if it's actually a problem or not!");
+      news.push("Ponyville citizens diagnosed with chronic happiness! Doctors unsure if it's actually a problem or not!");
     } else if(Game.totalsmiles < 1000000000000000000) {
       news.push("Scientists split friendship and discover a runaway chain reaction! Nuclear friendship bomb proposed by military!");
     } else {
@@ -238,7 +238,7 @@ $(function(){
     if(Game.totalsmiles > 10000) {
       news.push(
         'Twilight found shipping Rainbow Dash with everything in the universe! Riots erupt all across Equestria!',
-        'Lyra and BonBon revealed as "just friends"! Ponies everywhere faint in shock!',
+        'Lyra and BonBon revealed as "just friends"! Ponies everywhere faint in shock! Octavia and Vinyl Scratch refuse to comment.',
         "Celestia's insatiable desire for cake causes caketastrophe in the Royal Kitchen! A memorial service for the lost chocolate chips to be held on Monday.",
         "Pink menace at Sugarcube corner goes batty, takes 15 muffins hostage!",
         "Citizens of Ponyville vote to create a public library instead of relying on a private collection organized by a crazed purple mare!",
@@ -248,7 +248,13 @@ $(function(){
         "Rainbow Dash reportedly investing in the Cloud. Pegasi everywhere confused by what this means.",
         "Princess Twilight discovers that ponies are actually tiny nuclear reactors! \"That explains why I never need to go to the bathroom,\" says Rainbow Dash.",
         "Pony pony Pony pony pony pony Pony pony!",
-        "Princess Twilight Sparkle dating a peach! The peach has no comment on the matter."
+        "Princess Twilight Sparkle dating a peach! The peach has no comment on the matter.",
+        'Doctor Whooves bumps into himself. Ponyville citizens worried that there will be "No more."',
+        'Big Mac and Smarty Pants have deep philosophical conversations. When asked what he sounds like, Smarty Pants refuesed to comment.',
+        'BAD TIMBERWOLF',
+        'Apple Bloom found in shock on the edge of the Everfree Forest; says she visited a village of ponies with no Cutie Marks.',
+        'Applejack finds golden apple. Looks away awkwardly and quickly changes the subject when asked how she found it.',
+        'Pinkie Pie found running around Ponyville, proclaiming "Our lives aren\'t reality and that we\'re just a bunch of animated characters on a TV show meant for the entertainment of others!"'
       );
 
       if(Game.muffins > 10) {
@@ -273,7 +279,13 @@ $(function(){
           "Princess Cadence Announces that all muffins produced in the Crystal Empire now come with ‘Free Shipping’.  Her Highness then winked suggestively.",
           "As muffin craze sweeps Equestria, Sapphire Shores to star in new musical, ‘My Little Muffin, Baked-goods are Magic’.",
           "Diamond Tiara insists that her father has a bigger muffin collection than you, no matter how improbable that sounds.",
-          "New Poll from the Foal Free Press reveals that no food makes a young filly smile as much as a muffin."
+          "New Poll from the Foal Free Press reveals that no food makes a young filly smile as much as a muffin.",
+          'Sugarcube Corner hold muffin bake sale. Ponyville mourns the loss of many ponies during the ensuring muffin frenzy.',
+          "Chrysalis returns! Says she's just buying muffins."
+          );
+      }
+      if(Game.muffins > 200) {
+        news.push('Send help. Trapped in Equestria, being forced to write silly news messages.'
           );
       }
     }
@@ -411,8 +423,8 @@ $(function(){
     '204': { name:"Music Makes Everything Better", desc: "Listen to the smile song.", muffins:1},
     '205': { name:"You Monster", desc: "Sell a friendship.", muffins:1},
     '206': { name:"No Booping Allowed", desc: "Get <b>"+PrettyNum(1000000000000)+"</b> smiles with only 35 pony boops.", muffins:1, cond:function() { return Game.clicks <= 35 && Game.totalsmiles >= 1000000000000; } },
-    '207': { name:"Wheel of Friendship", desc: "Spin the ponies.", muffins:1, cond:function() { return vangle>0.05; } },
-    '208': { name:"Centrifuge of Friendship", desc: "Spin the ponies <b>really fast</b>.", muffins:2, cond:function() { return vangle>3; } },
+    '207': { name:"Wheel of Friendship", desc: "Spin the ponies.", muffins:1, cond:function() { return Math.abs(vangle)>0.05; } },
+    '208': { name:"Centrifuge of Friendship", desc: "Spin the ponies <b>really fast</b>.", muffins:2, cond:function() { return Math.abs(vangle)>3; } },
     '255': { name:"Completionist", desc: "Get all the achievements.", muffins:100}
   };
 
@@ -636,7 +648,7 @@ $(function(){
 
   // The game's difficulty is modelled using a series of curves defined by these values
   function fn_ratio(init,curve) { return function(n) { return init*Math.pow(curve,n); }; }
-  var fcurve = 1.3; // Friendship curve
+  var fcurve = 1.26; // Friendship curve
   var fcurve_init = 20;
   var rcurve = 1.13; // cost ratio curve
   var rcurve_init = 32; // Initial cost ratio (for a party)
@@ -699,7 +711,7 @@ $(function(){
     var cost = fn_cost1(Fvals[i-2]);
     var b = fn_estimatebuildings(cost, i);
     Store[i].initcost = initcost(Fvals[i-2],i,b);
-    Store[i].costcurve = 1.2 + (i*i*0.0048); //fn_costcurve(5, fn_rratio(i-2)*1.5, i, Store[i].initcost);
+    Store[i].costcurve = 1.2 + (i*i*0.0045); //fn_costcurve(5, fn_rratio(i-2)*1.5, i, Store[i].initcost);
   }
 
   Store[0].cost = fn_cost0;
@@ -1340,6 +1352,7 @@ $(function(){
   }
   var fnmouseup = function(event) {
     vangle = vlastangle;
+    CheckAchievements([207, 208]);
     mleftdown=false;
     vlastangle = 0;
   }
