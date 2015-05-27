@@ -90,14 +90,14 @@ var ponyclicker = (function(){
     {cost:function(n) {},name:"Friendship", plural: "friendships", desc: "A friendship between two ponies. You can't buy a friendship if everypony is friends with everypony else!", img: function(n){ return 'store/hoofbump.svg'; } },
     {cost:function(n) {},name:"Recital", plural: "recitals", desc: "A small recital for everypony you know.", formula: "Generates one smile per pony.<i>SPS = P</i>", img: function(n){ return 'store/cello.svg'; }}, // P
     {cost:function(n) {},name:"Party", plural: "parties", desc: "Throw a party for all your friends!", formula: "Generates one smile per friendship.<i>SPS = F</i>", img: function(n){ return 'store/balloon.svg'; }}, // F
-    {cost:function(n) {},name:"Parade", plural: "parades", desc: "Throw a big parade for everypony and all their friends!", formula: "Generates two smiles for each friendship and each pony.<i>SPS = 2&times;(P&plus;F)</i>", img: function(n){ return 'store/trixie_wagon.svg'; }}, // (P+F)*2.0
-    {cost:function(n) {},name:"Concert", plural: "concerts", desc: "Throw a concert for the whole town!", formula: "Generates one smile for every pony, friendship, and building you have.<i>SPS = P&plus;F&plus;B</i>", img: function(n){ return ''; }}, // P+F+B
-    {cost:function(n) {},name:"Festival", plural: "festivals", desc: "Celebrate a festival for a whole weekend!", formula: "Generates one smile for every pony you have, times the number of friends you have, times 1&frac12;.<i>SPS = P&times;F&times1.5</i>", img: function(n){ return 'store/stage.png'; }}, // P*F*1.5
-    {cost:function(n) {},name:"Rave", plural: "raves", desc: "Throw a gigantic rave party in Canterlot!", formula: "Generates one smile for every pony you have, times the number of friendships and buildings you have.<i>SPS = P&times;(F&plus;B)</i>", img: function(n){ return 'store/turntable.png'; }}, // P*(F+B)
-    {cost:function(n) {},name:"Grand Galloping Gala", plural: "grand galloping galas", desc: "Celebrate the Grand Galloping Gala with ponies from all over Equestria!", formula: "Generates one smile for every pony you have, times the number of friendships you have, times the number of buildings you have.<i>SPS = P&times;F&times;B</i>", img: function(n){ return 'store/redhat.svg'; }}, //P*F*(B+1)
-    {cost:function(n) {},name:"Coronation", plural: "coronations", desc: "Make some random pony a princess so you have an excuse to party all night!", formula: "Generates one smile per friendship, times two for every pony you have, plus the number of buildings you have.<i>SPS = 2<sup>P</sup>&times;F&plus;B</i>", img: function(n){ return 'store/twilicorn_crown.svg'; }}, //2^P*F+B
-    {cost:function(n) {},name:"National Holiday", plural: "national holidays", desc: "Declare a national holiday so everypony in equestria can party with you instead of being productive!", formula: "Generates one smile per friendship, times the number of buildings you have, times two for every pony you have.<i>2<sup>P</sup>&times;F&times;B</i>", img: function(n){ return ''; }}, //2^P*F*(B+1)
-    {cost:function(n) {},name:"Elements Of Harmony", plural: "Elements of Harmony", desc: "Use a giant rainbow friendship beam to solve all your problems!", formula: "Generates a bajillion smiles for every pony you have, plus one smile per friendship times the number of buildings you own.<i>P!&div;5! &plus; F&times;B</i>", img: function(n){ return 'store/'+ElementList[n%ElementList.length]+'.svg'; }}, //P!/(P-5)! + F*B
+    {cost:function(n) {},name:"Parade", plural: "parades", desc: "Throw a big parade for everypony and all their friends!", formula: "Generates one smile for each friendship and each pony.<i>SPS = P&plus;F</i>", img: function(n){ return 'store/trixie_wagon.svg'; }}, // P+F
+    {cost:function(n) {},name:"Concert", plural: "concerts", desc: "Throw a concert for the whole town!", formula: "Generates one smile for every pony, friendship, recital, party, and parade you have.<i>SPS = P&plus;F&plus;Recitals&plus;Parties&plus;Parades</i>", img: function(n){ return ''; }}, // P+F+Recitals+Parties+Parades
+    {cost:function(n) {},name:"Festival", plural: "festivals", desc: "Celebrate a festival for a whole weekend!", formula: "Generates one smile for every pony you have, times the number of friends you have.<i>SPS = P&times;F</i>", img: function(n){ return 'store/stage.png'; }}, // P*F
+    {cost:function(n) {},name:"Rave", plural: "raves", desc: "Throw a gigantic rave party in Canterlot!", formula: "Generates one smile for every pony, times the number of friendships, times the number of concerts.<i>SPS = P&times;F&times;Concerts</i>", img: function(n){ return 'store/turntable.png'; }}, // P*F*Concerts
+    {cost:function(n) {},name:"Grand Galloping Gala", plural: "grand galloping galas", desc: "Celebrate the Grand Galloping Gala with ponies from all over Equestria!", formula: "Generates one smile for every pony you have, times the number of friendships you have, times the number of parties and parades you have.<i>SPS = P&times;F&times;(Parties&plus;Parades)</i>", img: function(n){ return 'store/redhat.svg'; }}, //P*F*(Parties + Parades)
+    {cost:function(n) {},name:"Coronation", plural: "coronations", desc: "Make some random pony a princess so you have an excuse to party all night!", formula: "Generates one smile per pony, times your friendships, times your concerts, times your raves.<i>SPS = P&times;F&times;Concerts&times;Raves</i>", img: function(n){ return 'store/twilicorn_crown.svg'; }}, //P*F*Concerts*Raves
+    {cost:function(n) {},name:"National Holiday", plural: "national holidays", desc: "Declare a national holiday so everypony in equestria can party with you instead of being productive!", formula: "Generates one smile per pony, times your friendships, times your parades, times your festivals, times your coronations.<i>SPS = P&times;F&times;Parades&times;Festivals&times;Coronations</i>", img: function(n){ return ''; }}, //P*F*Parades*Festivals*Coronations
+    {cost:function(n) {},name:"Elements Of Harmony", plural: "Elements of Harmony", desc: "Use a giant rainbow friendship beam to solve all your problems!", formula: "Generates one smile per pony, times the number of friendships you have, times an exponential function of the fourth root of your friendships times the number of buildings you have.<i>SPS = P&times;F&times;exp((F*B)<sup>&frac14</sup>)</i>", img: function(n){ return 'store/'+ElementList[n%ElementList.length]+'.svg'; }}, //P*F*exp((F*B)^1/4)
   ];
 
   function factorial(n) { var r = n; while(--n > 1) { r = r*n; } return r; }
@@ -111,9 +111,10 @@ var ponyclicker = (function(){
   function fn_ratio(init,curve) { return function(n) { return init*Math.pow(curve,n); }; }
   var fcurve = 1.24; // Friendship curve
   var fcurve_init = 20;
-  var rcurve = 1.13; // cost ratio curve
-  var rcurve_init = 32; // Initial cost ratio (for a party)
-
+  var rcurve = 1.31; // cost ratio curve
+  var rcurve_init = 15; // Initial cost ratio (jump forwards twice to get the cost ratio for a recital)
+  var ccurve = 1.2;
+  
   // The fundamental curve is the cost of friendships. This forms a simple recurrence relation f_n = a*f_n-1, which has a closed-form solution of f_n = f_0*a^n
   var fn_cost1 = fn_ratio(fcurve_init, fcurve);
   Store[1].initcost = fcurve_init;
@@ -138,10 +139,17 @@ var ponyclicker = (function(){
 
   function inv_cost(i, cost) { return Math.floor(Math.log(cost/Store[i].initcost)/Math.log(Store[i].costcurve)) }
 
-  var Fvals = [4,12,30,40,50,50,70,80,95,120];
+  var Fvals = [0,0,4,12,30,40,50,60,75,80,95,120];
   var fn_rratio = fn_ratio(rcurve_init,rcurve); // gets the SPS ratio for a store of level n
+  function get_rratio(n) {
+    switch(n) {
+      case 10: return 2.0*fn_rratio(n);
+      case 11: return 3.5*fn_rratio(n);
+    }
+    return fn_rratio(n);
+  }
   function initSPS(i, store) { return Store[i].fn_SPS(store); }
-  function initcost(i, store) { return initSPS(i, store)*fn_rratio(i-2); }
+  function initcost(i, store) { return initSPS(i, store)*get_rratio(i); }
   function estimatestore(f, max) { 
     var s = [Math.floor(inv_triangular(f)),f];
     for(var j = 2; j < max; j++)
@@ -149,11 +157,12 @@ var ponyclicker = (function(){
     return s;
   }
   for(var i = 2; i < 12; ++i) {
-    Store[i].initcost = initcost(i, estimatestore(Fvals[i-2], i));
-    Store[i].costcurve = 1.2; //fn_costcurve(5, fn_rratio(i-2)*1.5, i, Store[i].initcost);
+    Store[i].initcost = initcost(i, estimatestore(Fvals[i], i));
+    Store[i].costcurve = ccurve; //fn_costcurve(5, fn_rratio(i-2)*1.5, i, Store[i].initcost);
   }
-  
-  function default_cost(i, n) { return Store[i].initcost*Math.pow(Store[i].costcurve,n); }
+  // Calculates a poisson distribution, which is useful for countering the SPS/cost ratio dip at the beginning of the cost function. Beyond n > 40 the function begins returning values on the order of 0.00000000001, so we just set it to 0 to prevent underflow errors.
+  function poisson(n,L) { return n>40?0:Math.pow(L,n)*Math.exp(-L)/factorial(n); }
+  function default_cost(i, n) { return Store[i].initcost*Math.pow(Store[i].costcurve,n)*(1+poisson(n+3,14)*5); }
 
   Store[0].cost = fn_cost0;
   Store[1].cost = fn_cost1;
@@ -435,6 +444,8 @@ var ponyclicker = (function(){
   
   function gen_upgradetype1(item, pSPS, mSPS) { return function(sps, store) { sps.pStore[item] += pSPS*store[item]; sps.mStore[item] += mSPS*store[item]; return sps; } }
   function gen_upgradetype2(item, p, m) { return function(sps, store) { sps.pSPC += p*store[item]; sps.mSPC += m; return sps; } }
+  function gen_upgradetype3(p, m) { return function(sps, store) { sps.pSPS += p; sps.mSPS += m; return sps; } }
+  function gen_finalupgrade(m) { return function(sps, store) { var b = (store[0]+store[1]+CountBuildings(store))*m; for(var i = 0; i < sps.mStore.length; ++i) sps.mStore[i] += b; return sps;} }
   function gen_muffinupgrade(pSPS, mSPS) { return function(sps, store) { sps.mMuffin += mSPS*((typeof Game !== 'undefined')?Game.muffins:0); return sps; } }
 
   /* upgrade pool object: {
@@ -456,15 +467,16 @@ var ponyclicker = (function(){
   var upgradeList = [ {cost:0, name:"UNDEFINED", desc:"ERROR", fn:null},
     {cost:600, name:"Booping Assistants", desc: "Booping gets +1 SPB for every pony you have.", fn:gen_upgradetype2(0, 1, 0), cond:defcond, flavor: 'Here Comes The Booping Squad.'},
     {cost:7000, name:"Friendship is Booping", desc: "Booping gets +1 SPB for every friendship you have.", fn:gen_upgradetype2(1, 1, 0), cond:defcond },
-    {cost:70000, name:"Ticklish Cursors", desc: "Booping gets 1% of your SPS.", fn:gen_upgradetype2(0, 0, 0.01), cond:defcond},
-    {cost:700000, name:"Feathered Cursors", desc: "Booping gets an additional 2% of your SPS.", fn:gen_upgradetype2(0, 0, 0.02), cond:defcond},
-    {cost:8000000, name:"Advanced Tickle-fu", desc: "Booping gets an additional 3% of your SPS.", fn:gen_upgradetype2(0, 0, 0.03), cond:defcond},
-    {cost:90000000, name:"Happiness Injection", desc: "Booping gets an additional 4% of your SPS.", fn:gen_upgradetype2(0, 0, 0.04), cond:defcond},
-    {cost:10000, name:"Friendship Is Magic", desc: "Friendships generate +1 SPS for every other friendship.", fn:gen_upgradetype1(1, 1, 0), cond:defcond },
-    {cost:1000000, name:"Friendship Is Spellcraft", desc: "Friendships generate +10 SPS for every other friendship.", fn:gen_upgradetype1(1, 10, 0), cond:defcond },
-    {cost:100000000, name:"Friendship Is Sorcery", desc: "Friendships generate +100 SPS for every other friendship.", fn:gen_upgradetype1(1, 100, 0), cond:defcond },
+    {cost:80000, name:"Ticklish Cursors", desc: "Booping gets 1% of your SPS.", fn:gen_upgradetype2(0, 0, 0.01), cond:defcond},
+    {cost:900000, name:"Feathered Cursors", desc: "Booping gets an additional 2% of your SPS.", fn:gen_upgradetype2(0, 0, 0.02), cond:defcond},
+    {cost:10000000, name:"Advanced Tickle-fu", desc: "Booping gets an additional 3% of your SPS.", fn:gen_upgradetype2(0, 0, 0.03), cond:defcond},
+    {cost:110000000, name:"Happiness Injection", desc: "Booping gets an additional 4% of your SPS.", fn:gen_upgradetype2(0, 0, 0.04), cond:defcond},
+    {cost:700000, name:"Friendship Is Magic", desc: "Friendships generate +1 SPS for every other friendship.", fn:gen_upgradetype1(1, 1, 0), cond:defcond },
+    {cost:10000000, name:"Friendship Is Spellcraft", desc: "Friendships generate +10 SPS for every other friendship.", fn:gen_upgradetype1(1, 10, 0), cond:defcond },
+    {cost:500000000, name:"Friendship Is Sorcery", desc: "Friendships generate +100 SPS for every other friendship.", fn:gen_upgradetype1(1, 100, 0), cond:defcond },
     {cost:10000000000, name:"Friendship Is Witchcraft", desc: "Friendships generate +1000 SPS for every other friendship.", fn:gen_upgradetype1(1, 1000, 0), cond:defcond },
-    {cost:1000000000000, name:"Friendship Is Benefits", desc: "Friendships generate +10000 SPS for every other friendship.", fn:gen_upgradetype1(1, 10000, 0), cond:defcond },
+    {cost:300000000000, name:"Friendship Is Benefits", desc: "Friendships generate +10000 SPS for every other friendship.", fn:gen_upgradetype1(1, 10000, 0), cond:defcond },
+    {cost:3800000000000, name:"Friendship Is Rainbows", desc: "Friendships generate +100000 SPS for every other friendship.", fn:gen_upgradetype1(1, 100000, 0), cond:defcond },
     {cost:7777777, name:"I just don't know what went wrong!", desc: "You gain +1% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.01), cond:defcond },
     {cost:7777777777, name:"That one mailmare", desc: "You gain an additional +2% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.02), cond:defcond },
     {cost:7777777777777, name:"Derpy Delivery Service", desc: "You gain an additional +3% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.03), cond:defcond },
@@ -475,7 +487,97 @@ var ponyclicker = (function(){
     {cost:7777777777777777777777777777, name:"Muffin Bakeries", desc: "You gain an additional +8% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.08), cond:defcond },
     {cost:7777777777777777777777777777777, name:"Designer Muffins", desc: "You gain an additional +9% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.09), cond:defcond },
     {cost:7777777777777777777777777777777777, name:"Muffin Factories", desc: "You gain an additional +10% SPS for every muffin you have.", fn:gen_muffinupgrade(0, 0.1), cond:defcond },
-    //{cost:50000, name:"Upgrade 3", desc: "Parties generate +1 SPS for every other party.", fn:gen_upgradetype1(2, 1, 0), cond:gencountcond(2,1) },
+    {cost:320000, name:"Row Row Your Boat", desc: "Recitals generate +1 SPS for every other recital.", fn:gen_upgradetype1(2, 1, 0), cond:defcond },
+    {cost:9000000, name:"Fur Elise", desc: "Recitals generate +10 SPS for every other recital.", fn:gen_upgradetype1(2, 10, 0), cond:defcond },
+    {cost:350000000, name:"Moonlight Sonata", desc: "Recitals generate +100 SPS for every other recital.", fn:gen_upgradetype1(2, 100, 0), cond:defcond },
+    {cost:12000000000, name:"Tocatta In D Minor", desc: "Recitals generate +1000 SPS for every other recital.", fn:gen_upgradetype1(2, 1000, 0), cond:defcond },
+    {cost:200000000000, name:"Nocturne", desc: "Recitals generate +10000 SPS for every other recital.", fn:gen_upgradetype1(2, 10000, 0), cond:defcond },
+    {cost:660000, name:"Welcome Party", desc: "Parties generate +2 SPS for every other party.", fn:gen_upgradetype1(3, 2, 0), cond:defcond },
+    {cost:50000000, name:"Birthday Party", desc: "Parties generate +20 SPS for every other party.", fn:gen_upgradetype1(3, 20, 0), cond:defcond },
+    {cost:1000000000, name:"Cider Weekend", desc: "Parties generate +200 SPS for every other party.", fn:gen_upgradetype1(3, 200, 0), cond:defcond },
+    {cost:20000000000, name:"Wedding", desc: "Parties generate +2000 SPS for every other party.", fn:gen_upgradetype1(3, 2000, 0), cond:defcond },
+    {cost:320000000000, name:"Anniversary", desc: "Parties generate +20000 SPS for every other party.", fn:gen_upgradetype1(3, 20000, 0), cond:defcond },
+    {cost:900000, name:"Mayor Day", desc: "Parades generate +4 SPS for every other parade.", fn:gen_upgradetype1(4, 4, 0), cond:defcond },
+    {cost:100000000, name:"Celestia Day", desc: "Parades generate +40 SPS for every other parade.", fn:gen_upgradetype1(4, 40, 0), cond:defcond },
+    {cost:2000000000, name:"Parade Day", desc: "Parades generate +400 SPS for every other parade.", fn:gen_upgradetype1(4, 400, 0), cond:defcond },
+    {cost:40000000000, name:"Night Day ...?", desc: "Parades generate +4000 SPS for every other parade.", fn:gen_upgradetype1(4, 4000, 0), cond:defcond },
+    {cost:850000000000, name:"Day Day ???", desc: "Parades generate +40000 SPS for every other parade.", fn:gen_upgradetype1(4, 40000, 0), cond:defcond },
+    {cost:1000000, name:"Canon In D Major", desc: "Concerts generate +8 SPS for every other concert.", fn:gen_upgradetype1(5, 8, 0), cond:defcond, flavor: "It follows you everywhere. There is no escape." },
+    {cost:100000000, name:"Four Seasons", desc: "Concerts generate +80 SPS for every other concert.", fn:gen_upgradetype1(5, 80, 0), cond:defcond },
+    {cost:1750000000, name:"The Nutcracker", desc: "Concerts generate +800 SPS for every other concert.", fn:gen_upgradetype1(5, 800, 0), cond:defcond },
+    {cost:80000000000, name:"Beethooven's Ninth", desc: "Concerts generate +8000 SPS for every other concert.", fn:gen_upgradetype1(5, 8000, 0), cond:defcond },
+    {cost:1000000000000, name:"Requiem In D Minor", desc: "Concerts generate +80000 SPS for every other concert.", fn:gen_upgradetype1(5, 80000, 0), cond:defcond },
+    {cost:1500000000, name:"Festive Festivities", desc: "Festivals generate twice as many smiles.", fn:gen_upgradetype1(6, 0, 1.0), cond:defcond },
+    {cost:15000000000, name:"Flower Festival", desc: "Festivals smile generation doubled, again.", fn:gen_upgradetype1(6, 0, 1.0), cond:defcond },
+    //{cost:150000000000, name:"Upgrade 6", desc: "Festivals smile generation doubled, again.", fn:gen_upgradetype1(6, 0, 1.0), cond:defcond },
+    //{cost:1500000000000, name:"Upgrade 6", desc: "Festivals smile generation doubled, again.", fn:gen_upgradetype1(6, 0, 1.0), cond:defcond },
+    //{cost:15000000000000, name:"Upgrade 6", desc: "Festivals smile generation doubled, again.", fn:gen_upgradetype1(6, 0, 1.0), cond:defcond },
+    {cost:8000000, name:"DJ Pon-3", desc: "Raves generate +32 SPS for every other rave.", fn:gen_upgradetype1(7, 32, 0), cond:defcond },
+    {cost:800000000, name:"Glaze", desc: "Raves generate +320 SPS for every other rave.", fn:gen_upgradetype1(7, 320, 0), cond:defcond },
+    {cost:11000000000, name:"Glowsticks", desc: "Raves generate +3200 SPS for every other rave.", fn:gen_upgradetype1(7, 3200, 0), cond:defcond },
+    {cost:160000000000, name:"Extra Glowsticks", desc: "Raves generate +32000 SPS for every other rave.", fn:gen_upgradetype1(7, 32000, 0), cond:defcond },
+    {cost:2300000000000, name:"Subwoofers", desc: "Raves generate +320000 SPS for every other rave.", fn:gen_upgradetype1(7, 320000, 0), cond:defcond },
+    {cost:16000000, name:"Two-bit Dress", desc: "Grand Galloping Galas generate +64 SPS for every other Grand Galloping Gala.", fn:gen_upgradetype1(8, 64, 0), cond:defcond },
+    {cost:400000000, name:"Formal Attire", desc: "Grand Galloping Galas generate +640 SPS for every other Grand Galloping Gala.", fn:gen_upgradetype1(8, 640, 0), cond:defcond },
+    {cost:6000000000, name:"Tailored Suit", desc: "Grand Galloping Galas generate +6400 SPS for every other Grand Galloping Gala.", fn:gen_upgradetype1(8, 6400, 0), cond:defcond },
+    {cost:120000000000, name:"Rarity's Finest", desc: "Grand Galloping Galas generate +64000 SPS for every other Grand Galloping Gala.", fn:gen_upgradetype1(8, 64000, 0), cond:defcond },
+    {cost:3000000000000, name:"Hats", desc: "Grand Galloping Galas generate +640000 SPS for every other Grand Galloping Gala.", fn:gen_upgradetype1(8, 640000, 0), cond:defcond },
+    {cost:32000000, name:"Princess Twilight", desc: "Coronations generate +128 SPS for every other Coronation.", fn:gen_upgradetype1(9, 128, 0), cond:defcond },
+    {cost:1500000000, name:"Princess Cadance", desc: "Coronations generate +1280 SPS for every other Coronation.", fn:gen_upgradetype1(9, 1280, 0), cond:defcond },
+    {cost:22000000000, name:"Princess Derpy", desc: "Coronations generate +12800 SPS for every other Coronation.", fn:gen_upgradetype1(9, 12800, 0), cond:defcond },
+    {cost:340000000000, name:"Princess Big Mac", desc: "Coronations generate +128000 SPS for every other Coronation.", fn:gen_upgradetype1(9, 128000, 0), cond:defcond },
+    {cost:8000000000000, name:"Fausticorn", desc: "Coronations generate +1280000 SPS for every other Coronation.", fn:gen_upgradetype1(9, 1280000, 0), cond:defcond },
+    {cost:64000000, name:"Three Day Weekend", desc: "National holidays generate +256 SPS for every other national holiday.", fn:gen_upgradetype1(10, 256, 0), cond:defcond },
+    {cost:1500000000, name:"Extra Day Off", desc: "National holidays generate +2560 SPS for every other national holiday.", fn:gen_upgradetype1(10, 2560, 0), cond:defcond },
+    {cost:22000000000, name:"Four Day Weekend", desc: "National holidays generate +25600 SPS for every other national holiday.", fn:gen_upgradetype1(10, 25600, 0), cond:defcond },
+    {cost:300000000000, name:"Bonus Vacation Time", desc: "National holidays generate +256000 SPS for every other national holiday.", fn:gen_upgradetype1(10, 256000, 0), cond:defcond },
+    {cost:900000000000, name:"Week-long Sabbatical", desc: "National holidays generate +2560000 SPS for every other national holiday.", fn:gen_upgradetype1(10, 2560000, 0), cond:defcond },
+    {cost:100000, name:"Plain Bagels", desc: "+1% smiles per second", fn:gen_upgradetype3(0, 0.01), cond:defcond },
+    {cost:1000000, name:"Poppyseed Bagels", desc: "+1% smiles per second", fn:gen_upgradetype3(0, 0.01), cond:defcond },
+    {cost:10000000, name:"Blueberry Bagels", desc: "+1% smiles per second", fn:gen_upgradetype3(0, 0.01), cond:defcond },
+    {cost:100000000, name:"Onion Bagels", desc: "+1% smiles per second", fn:gen_upgradetype3(0, 0.01), cond:defcond },
+    {cost:1000000000, name:"Cinnamon Raisin Bagels", desc: "+1% smiles per second", fn:gen_upgradetype3(0, 0.01), cond:defcond },
+    {cost:10000000000, name:"French Toast Bagels", desc: "+1% smiles per second", fn:gen_upgradetype3(0, 0.01), cond:defcond },
+    {cost:100000000000, name:"Banana Bread Bagels", desc: "+1% smiles per second", fn:gen_upgradetype3(0, 0.01), cond:defcond },
+    {cost:1000000000000, name:"Cheese Pastry", desc: "+5% smiles per second", fn:gen_upgradetype3(0, 0.05), cond:defcond },
+    {cost:1500000000000, name:"Chocolate Pastry", desc: "+5% smiles per second", fn:gen_upgradetype3(0, 0.05), cond:defcond },
+    {cost:2000000000000, name:"Cherry Pastry", desc: "+5% smiles per second", fn:gen_upgradetype3(0, 0.05), cond:defcond },
+    {cost:2500000000000, name:"Strawberry Pastry", desc: "+5% smiles per second", fn:gen_upgradetype3(0, 0.05), cond:defcond },
+    {cost:3000000000000, name:"Blueberry Pastry", desc: "+5% smiles per second", fn:gen_upgradetype3(0, 0.05), cond:defcond },
+    {cost:3500000000000, name:"Raspberry Pastry", desc: "+5% smiles per second", fn:gen_upgradetype3(0, 0.05), cond:defcond },
+    {cost:4000000000000, name:"Blackberry Pastry", desc: "+5% smiles per second", fn:gen_upgradetype3(0, 0.05), cond:defcond },
+    {cost:100000000000, name:"Friendship Is Friendly", desc: "Friendships gain +1% SPS.", fn:gen_upgradetype1(1, 0, 0.01), cond:defcond },
+    {cost:30000000000, name:"Friendship Is Recitals", desc: "Recitals gain +1% SPS.", fn:gen_upgradetype1(2, 0, 0.01), cond:defcond },
+    {cost:100000000000, name:"Friendship Is Parties", desc: "Parties gain +1% SPS.", fn:gen_upgradetype1(3, 0, 0.01), cond:defcond },
+    {cost:200000000000, name:"Friendship Is Parades", desc: "Parades gain +1% SPS.", fn:gen_upgradetype1(4, 0, 0.01), cond:defcond },
+    {cost:500000000000, name:"Friendship Is Concerts", desc: "Concerts gain +1% SPS.", fn:gen_upgradetype1(5, 0, 0.01), cond:defcond },
+    {cost:1000000000000, name:"Friendship Is Festivals", desc: "Festivals gain +1% SPS.", fn:gen_upgradetype1(6, 0, 0.01), cond:defcond },
+    {cost:2000000000000, name:"Friendship Is Raves", desc: "Raves gain +1% SPS.", fn:gen_upgradetype1(7, 0, 0.01), cond:defcond },
+    {cost:10000000000000000, name:"Mirror Pool", desc: "Everything gets +0.01% SPS for everything else.", fn:gen_finalupgrade(0.0001), cond:defcond },
+    {cost:40000000000000000, name:"Mirror Mirror Pool", desc: "Everything gets +0.02% SPS for everything else.", fn:gen_finalupgrade(0.0002), cond:defcond },
+    {cost:800000000000000000, name:"Super Mirror Pool", desc: "Everything gets +0.04% SPS for everything else.", fn:gen_finalupgrade(0.0004), cond:defcond },
+    {cost:1600000000000000000, name:"Duper Mirror Pool", desc: "Everything gets +0.07% SPS for everything else.", fn:gen_finalupgrade(0.0007), cond:defcond },
+    {cost:3200000000000000000, name:"Hyper Mirror Pool", desc: "Everything gets +0.1% SPS for everything else.", fn:gen_finalupgrade(0.001), cond:defcond },
+    {cost:9000000000000000000, name:"Ascended Mirror Pool", desc: "Everything gets +0.2% SPS for everything else.", fn:gen_finalupgrade(0.002), cond:defcond },
+    {cost:50000000000000000000, name:"Mega Mirror Pool", desc: "Everything gets +0.4% SPS for everything else.", fn:gen_finalupgrade(0.004), cond:defcond },
+    {cost:250000000000000000000, name:"Giga Mirror Pool", desc: "Everything gets +0.7% SPS for everything else.", fn:gen_finalupgrade(0.007), cond:defcond },
+    {cost:1000000000000000000000, name:"Ultra Mirror Pool", desc: "Everything gets +1% SPS for everything else.", fn:gen_finalupgrade(0.01), cond:defcond },
+    {cost:4000000000000000000000, name:"Master Mirror Pool", desc: "Everything gets +2% SPS for everything else.", fn:gen_finalupgrade(0.02), cond:defcond },
+    {cost:12000000000000000000000, name:"Ultimate Mirror Pool", desc: "Everything gets +4% SPS for everything else.", fn:gen_finalupgrade(0.04), cond:defcond },
+    {cost:24000000000000000000000, name:"Über Mirror Pool", desc: "Everything gets +7% SPS for everything else.", fn:gen_finalupgrade(0.07), cond:defcond },
+    {cost:50000000000000000000000, name:"Omni Mirror Pool", desc: "Everything gets +10% SPS for everything else.", fn:gen_finalupgrade(0.1), cond:defcond },
+    {cost:100000000000000000000000, name:"Supreme Mirror Pool", desc: "Everything gets +20% SPS for everything else.", fn:gen_finalupgrade(0.2), cond:defcond },
+    {cost:200000000000000000000000, name:"Neo Mirror Pool", desc: "Everything gets +30% SPS for everything else.", fn:gen_finalupgrade(0.3), cond:defcond },
+    {cost:500000000000000000000000, name:"Epic Mirror Pool", desc: "Everything gets +40% SPS for everything else.", fn:gen_finalupgrade(0.4), cond:defcond },
+    {cost:1000000000000000000000000, name:"Global Mirror Pool", desc: "Everything gets +50% SPS for everything else.", fn:gen_finalupgrade(0.5), cond:defcond },
+    {cost:2000000000000000000000000, name:"Solar Mirror Pool", desc: "Everything gets +60% SPS for everything else.", fn:gen_finalupgrade(0.6), cond:defcond },
+    {cost:4000000000000000000000000, name:"Galactic Mirror Pool", desc: "Everything gets +70% SPS for everything else.", fn:gen_finalupgrade(0.7), cond:defcond },
+    {cost:8000000000000000000000000, name:"Universal Mirror Pool", desc: "Everything gets +80% SPS for everything else.", fn:gen_finalupgrade(0.8), cond:defcond },
+    {cost:15000000000000000000000000, name:"Cosmic Mirror Pool", desc: "Everything gets +90% SPS for everything else.", fn:gen_finalupgrade(0.9), cond:defcond },
+    {cost:30000000000000000000000000, name:"Immortal Mirror Pool", desc: "Everything gets +100% SPS for everything else.", fn:gen_finalupgrade(1), cond:defcond },
+    {cost:1000000000000000000000000000, name:"Forever Mirror Pool", desc: "Everything gets +1000% SPS for everything else.", fn:gen_finalupgrade(10), cond:defcond },
+    {cost:100000000000000000000000000000, name:"Eternal Mirror Pool", desc: "Everything gets +10000% SPS for everything else.", fn:gen_finalupgrade(100), cond:defcond },
+    {cost:100000000000000000000000000000000, name:"Final Mirror Pool", desc: "Everything gets +100000% SPS for everything else.", fn:gen_finalupgrade(1000), cond:defcond },
   ];
 
   for(var i = 0; i < upgradeList.length; ++i) {
@@ -670,9 +772,6 @@ var ponyclicker = (function(){
     return SPS;
   }
   function CalcSPSinit(store) {
-    var P = store[0];
-    var F = store[1];
-    var B = CountBuildings(store);
     var result = [];
     for(var i = 0; i < Store.length; ++i) {
       result.push(Store[i].fn_SPS(store));
@@ -804,6 +903,7 @@ var ponyclicker = (function(){
   
   var lastUpgrade = [];
   function UpdateStore() {
+    // TODO: Find the most efficient building
     $ponycost.html("(NEEDS " + Math.ceil(inv_triangular(Game.store[1]+1)) + " PONIES)").hide();
     for(var i = 0; i < Store.length; ++i) {
       var item = Store[i],
